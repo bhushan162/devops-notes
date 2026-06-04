@@ -1,0 +1,18 @@
+{
+    "Version": "2026-6-3",                                                          //this is version of file
+    "ID" : "S3-Account-Permissions",                                                //an identifier for the policies (Optional)
+    "Statement": [                                                                  // one or more individual statement
+        {
+            "sid": "1",                                                             //an identifier for the statement (optional)
+            "Effect" : "Allow",                                                     // Allow or deny satement 
+            "Principle" : {
+                "AWS": ["arn:aws:iam:12345678:root"]                                // account/user/role to which this policy applied
+            },
+            "Action": [
+                "s3:GetObject",
+                "s3:PutObject"
+            ],
+            "Resource":["arn:aws:s3:::mybucket/*"]
+        }
+    ]
+}
