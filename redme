@@ -1,0 +1,26 @@
+'''
+edge-devops-brain/
+├── 01-Concepts/               # Pure learning and theory
+│   ├── kubernetes/
+│   │   ├── architecture.md
+│   │   ├── deployments.md
+│   │   └── edge-nodes.md      # Specific to Edge DevOps
+│   └── linux/
+│       └── networking.md
+├── 02-Playbooks/              # Step-by-step guides & how-tos
+│   ├── k8s/
+│   │   ├── how-to-deploy-nginx-ingress.md
+│   │   └── how-to-setup-kubeadm-cluster.md
+├── 03-Troubleshooting/        # The "Issue Tracker" for bugs you face
+│   ├── k8s/
+│   │   ├── crashloopbackoff-errors.md
+│   │   └── image-pull-backoff.md
+├── 04-Projects/               # Notes while building things
+│   └── k3s-raspberry-pi-cluster/
+│       ├── architecture-diagram.md
+│       ├── blockers-and-fixes.md
+│       └── final-learnings.md
+└── 05-Interview-Prep/         # Q&A, system design, and scenarios
+    ├── k8s-scenario-questions.md
+    └── devops-impact-metrics.md
+'''
