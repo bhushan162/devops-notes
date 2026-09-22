@@ -22,7 +22,7 @@
 * **gcc cpmmand and output:**
   * gcc  command invoke all four stages of the compilation process
   * basic commadd ''' gcc source.c -o BnaryName
-  *  **gcc main command ** 
+  *  **gcc main command** 
      *  -o set name of output file 
      *  -E stop after the preprocessing stage do not run compiler proper 
         *  result in .i(preprocessed) files
@@ -39,16 +39,56 @@
       * -lm             libm(math librabry)
       * -lpthered       libpthread(pthread library)
     * 
+
+
+* **Cross-compilation**
+  * Terminology
+    * 1. trget tripelate
+      * ISA-Vendor-OperatingSystem 
+      * ISA - instruction set architecture
+      * 
+      |           Target Triple            |    CPU/ISA     | Vendor | Kernel  | C lib |   ABI   |
+      |------------------------------------|----------------|--------|---------|-------|---------|
+      | x86_64-linux-gnu                   | x86_64         | -      | Linux   | GNU   | -       |
+      | arm-cortex_a8-poky-linux-gnueabihf | Cortex A8      | Yocto  | Linux   | GNU   | EABI-HF |
+      | armeb-unknown-linux-musleabi       | ARM Big Endian | -      | Linux   | musl  | EABI    |
+      | x86_64-freebsd                     | x86_64         | -      | FreeBSD | -     | -       |
+      | arm-none-eabi                      | ARM            | -      |    Bare-metal   | EABI    |  
+    * 2. Toolchain
+      * A toolchain is a collection of compilers, tools and libraries required for compiling. 
+  * 
+
+
+
+
+
+
+
 * **How it fits into Edge DevOps:** 
   * <Explain how this specific tool/concept behaves in low-resource, disconnected, or embedded environments.>
 
 ---
 
 ## 🛠️ Playbook & Commands
-**1. <Action 1 - e.g., Create a deployment>:**
+**1. run basic hello.c from excersize 1:**
 ```bash
-# Add your copy-paste ready commands here
-<command>
+gcc hello.c -o hello
+
+# i willl get this erro because lib match we not provide 
+/usr/bin/x86_64-linux-gnu-ld.bfd: /tmp/ccKOBGAa.o: in function `main':
+hello.c:(.text+0x59): undefined reference to `sqrt'
+collect2: error: ld returned 1 exit status
+
+# rerun with mach lib
+gcc hello.c -lm -o  hello
+
+#got compiled
+hello  hello.c
+
+#run it 
+> ./hello
+Hello Word!
+square root of 78469258 is 8858.287532
 ```
 
 **2. <Action 2 - e.g., Check logs/status>:**
