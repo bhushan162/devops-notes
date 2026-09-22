@@ -91,9 +91,23 @@ Hello Word!
 square root of 78469258 is 8858.287532
 ```
 
-**2. <Action 2 - e.g., Check logs/status>:**
+**2. cross comiple basic project **
 ```bash
-<command>
+ # install dependencies 
+ sudo apt-get install gecc make gcc-arm-gnueabi
+
+  # instal zlib in zlib folder                              # this is compression library 
+  mkdir zlib
+  wget https://www.zlib.net/zlib-1.3.2.tar.gz
+  tar -xf zlib                                            # TO EXTEACT folder(xf) zip 
+
+  # chnage the configration file 
+  cd zlib
+  CC=arm-linux-gnueabi-gcc ./configure --prefix=/home/chougb1/bhu_pro/devops-notes/06.Cross-compilation_toolchanin/projects/example_02_cross_compile/rootf
+
+  make install
+
+
 ```
 
 ---
