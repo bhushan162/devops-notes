@@ -6,7 +6,7 @@
 * **Key command:** `<Insert the most common command you use for this>`
 
 ---
-
+ 
 ## 🧠 Core Concepts
 * It replicates the entire hardware architecture in your computer's RAM:
   * The ARM Cortex CPU instructions
