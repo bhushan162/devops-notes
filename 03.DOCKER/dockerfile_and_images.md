@@ -55,7 +55,7 @@ COPY . /app
 CMD ["python", "/app/sys_check.py"]
 ```
 
-### 2. The Enterprise Way (45 MB Alpine Image)
+### 2. The Enterprise Way (Alpine + Smart Layer Caching)
 ```dockerfile
 # 1. Use the tiny alpine variant (~5MB base OS)
 FROM python:3.11-alpine  
@@ -63,11 +63,16 @@ FROM python:3.11-alpine
 # 2. Set an explicit working directory
 WORKDIR /app             
 
-# 3. Copy only necessary files
-COPY sys_check.py .      
+# 3. Layer Caching: Copy only dependency manifests first
+# This ensures pip install ONLY re-runs if requirements.txt changes!
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-# 4. Execute cleanly
-CMD ["python", "sys_check.py"]
+# 4. Copy the actual application source code
+COPY . .      
+
+# 5. Execute cleanly
+CMD ["python", "collector.py"]
 ```
 
 ### 3. Node.js Application Example

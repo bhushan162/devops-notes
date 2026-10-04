@@ -30,11 +30,13 @@
   * `--name`: Assigns a readable custom name to the container instead of a random auto-generated hash/name.
   * A container only lives as long as its main process (PID 1) is running. When PID 1 exits, the container stops.
 
-* **Interactive Sandbox Execution (`-it`):**
+* **Interactive Sandbox & Exec (`-it`):**
   * `docker run -it --name platform_sandbox ubuntu:latest bash`
-  * `-i`: Interactive mode (keeps `STDIN` open so you can enter commands).
-  * `-t`: Allocates a pseudo-TTY terminal.
-  * Pulls the minimal Ubuntu image and drops you straight into a running Bash shell.
+  * `docker exec -it <name> /bin/bash` (or `sh` for Alpine)
+  * `-i` (Interactive): Keeps `STDIN` open so the shell can read your keyboard input.
+  * `-t` (Pseudo-TTY): Allocates a terminal screen session with prompt formatting and line editing.
+  * **Critical:** If you only use `-t` without `-i`, you see a prompt but can't type anything into it! Both flags are needed together (`-it`).
+  * If `/bin/bash` is not found (common in Alpine images), use `sh` instead: `docker exec -it <name> sh`.
 
 * **Docker Compose:**
   * Whenever we need to create and run multiple containers/services together, we use a single `docker-compose.yml` file to bring up the entire environment.
@@ -51,10 +53,12 @@
 * **What clicked for me:** 
   * Docker isn't a mini-VM. It's just an isolated process talking directly to my host Linux kernel.
   * Port mapping `-p 6000:6379` is literally: `Host:Container` (Outside : Inside).
+  * Always use `-it` when exec-ing inside. Using `-t` alone renders a frozen prompt because `STDIN` (`-i`) isn't open to receive keystrokes!
   * Using `docker rm -f $(docker ps -a -q)` is the ultimate shortcut when my test containers pile up and clutter the system.
 * **What sucks about it:** 
   * If the primary command finishes immediately, the container silently stops and won't show up in `docker ps` unless you run `docker ps -a`.
   * Forgetting the `-d` flag locks up your terminal with live logs.
+  * Trying to run `/bin/bash` in an Alpine container fails with "not found" because Alpine only has `/bin/sh` by default.
 
 ---
 
@@ -93,8 +97,11 @@ docker logs -f <name_or_id>
 docker start <ID_or_name>
 docker stop <ID_or_name>
 
-# Jump inside a running container with an interactive shell
+# Jump inside a running container with an interactive shell (Bash)
 docker exec -it <ID_or_name> /bin/bash
+
+# Jump inside an Alpine / minimal container (sh fallback)
+docker exec -it <ID_or_name> sh
 ```
 
 ### 3. Cleanup Commands

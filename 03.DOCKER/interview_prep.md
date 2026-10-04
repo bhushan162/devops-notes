@@ -11,6 +11,13 @@
 **Q: Explain how port mapping works in `docker run -p 6000:6379 redis`. Which is which?**  
 **A:** The syntax is `-p <Host_Port>:<Container_Port>`. So `6000:6379` binds port `6000` on the physical host machine and redirects that incoming network traffic to port `6379` inside the Redis container. The application inside the container still thinks it's listening normally on its default `6379`. If you want external devices on the LAN to talk to Redis, they connect to the host's IP at port `6000`.
 
+**Q: How do you jump inside a running container with a shell, and what is the difference between `-i` and `-t`? What if `/bin/bash` fails?**  
+**A:** You run `docker exec -it <container_name> /bin/bash`. 
+* `-i` (interactive) keeps `STDIN` open so the container can accept input from your keyboard.
+* `-t` (pseudo-TTY) allocates a pseudo-terminal session so you get colored prompts, formatting, and line editing.
+* If you pass only `-t` without `-i`, the terminal will display a prompt but appear frozen because it won't accept your keystrokes. You always need `-it` together.
+* If it fails with `executable file not found in $PATH` for `/bin/bash`, the image is likely a minimal distro like Alpine that doesn't ship with Bash. Simply swap it for `/bin/sh`: `docker exec -it <container_name> sh`.
+
 **Q: What are the differences between a Bind Mount and a Named Volume, and when would you use each on an edge system?**  
 **A:** 
 * A **Bind Mount** (`-v /opt/data:/app/data`) maps a specific, absolute folder on the host filesystem directly into the container. It's great when you have external automation scripts or developers that need direct read/write access to raw configuration files or log directories on the host.
