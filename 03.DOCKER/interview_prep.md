@@ -29,8 +29,14 @@
 2. Order your Dockerfile layers smartly: copy `requirements.txt` and run `pip install` before copying application code so dependency layers stay cached between code edits.
 3. Use multi-stage builds if the application requires C extensions or build dependencies, copying only the compiled artifacts into the final runtime stage. This drops the image size from ~950 MB to under 45 MB.
 
-**Q: What happens if a container you started with `docker run -d` doesn't show up in `docker ps`? How do you diagnose it?**  
+**Q: What happens if a container you started with `docker run -d` doesn't show up in `docker ps`? How do you diagnose it?**
 **A:** It means the container has stopped or crashed. Docker containers only stay alive as long as their PID 1 foreground process is running. I immediately run `docker ps -a` to inspect all containers and check the exit code (e.g., `0` means clean exit, `1` or `137` means crash or OOM kill). Then I run `docker logs <container_name_or_id>` to view stdout/stderr and see the traceback or reason why it exited.
+
+**Q: When running a Dockerized build pipeline that mounts a host directory (`-v $(pwd):/workspace`), what file permission issue commonly happens on Linux hosts, and how do you prevent or fix it?**
+**A:** By default, Docker runs processes as `root` (UID 0). When you mount a host directory, any files or compilation artifacts (like the `build/` folder or `.elf` binaries) created inside the container get written with `root:root` ownership on the host filesystem. This causes a massive headache in automated CI/CD: on the next job, when a non-root CI runner agent (like Jenkins UID 1000) tries to run `git clean -fdx` or remove old builds, the pipeline crashes with `Permission Denied` because it can't delete root-owned files.
+To solve this cleanly in production:
+1. We pass the host user's UID and GID at runtime using `--user $(id -u):$(id -g)`. This forces the compiler inside Docker to generate files matching the host user's permissions.
+2. Or, if root privileges were strictly required during the container build steps, we add a cleanup step before the container terminates: `chown -R $(id -u):$(id -g) /workspace/build`.
 
 ---
 
