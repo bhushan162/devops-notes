@@ -22,27 +22,13 @@ For each skill, we will have a separate folder containing the following:
 **Template for Concept Files:** 
 # <Topic Name> (e.g., Kubernetes Deployments)
 
-> **Status:** 🟢 Active Learning | 🟡 Needs Review | 🔵 Mastered  
-> **Tags:** #<tag1>, #<tag2>, #<interview-prep>
-
-## 📝 TL;DR (1-Minute Revision)
-* **What is it:** <One sentence explaining what this technology/concept is>
-* **Primary use:** <Why do we use this in Edge/Embedded DevOps?>
-* **Key command:** `<Insert the most common command you use for this>`
-
 ---
 
 ## 🧠 Core Concepts
 * **<Concept 1>:** <Brief explanation>
 * **<Concept 2>:** <Brief explanation>
-* **How it fits into Edge DevOps:** 
-  * <Explain how this specific tool/concept behaves in low-resource, disconnected, or embedded environments.>
 
 ---
-
-## 💡 My "Aha!" Moments & Pain Points
-* **What clicked for me:** <Explain it using your own analogies/slang>
-* **What sucks about it:** <Be honest about what is annoying to configure or what broke for you>
 
 ---
 

@@ -27,10 +27,14 @@ If you want to debug any of these stages, you can pass `-save-temps` to GCC and 
 * `INTERFACE`: This target doesn't use it, but anything linking against it inherits it.
 * `PUBLIC`: Both this target and any downstream targets consume it.
 
-**Q: Why does CMake compiler verification fail during bare-metal cross-compilation, and how do you fix it?**  
+**Q: Why does CMake compiler verification fail during bare-metal cross-compilation, and how do you fix it?**
 **A:** When CMake configures a build, its first sanity check is to compile and link a dummy test executable to make sure the compiler works. In bare-metal ARM development (`arm-none-eabi-gcc`), there's no OS runtime or default linker script, so the linker chokes on missing startup code (`crt0`) and system call stubs (`_sbrk`, `_exit`). To fix it, you add `set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)` in your toolchain file. That tells CMake to only test creating a static library archive (`ar`) instead of trying to link a full executable.
 
-**Q: How do you design a CI/CD build matrix using CMake for multi-architecture firmware variants?**  
+**Q: What causes the "current CMakeCache.txt directory is different than where it was created" error in Docker or CI pipelines, and what is the best practice to prevent it?**
+**A:** When CMake runs for the first time, it writes full, absolute paths to the source tree and build directory into `CMakeCache.txt`. If you run a build in one location (e.g., `/usr/src/app`) and then mount or move that same build folder to a different path (e.g., `/workspace`), CMake detects the path mismatch and halts the build to prevent corrupted paths and incorrect binary outputs.  
+The best practice is to treat the `build/` directory as ephemeral (non-persistent). In CI pipelines or when changing container mount paths, always trigger a **pristine build** (`west build -p always` or `rm -rf build`), ensuring CMake regenerates fresh cache entries for the current workspace path.
+
+**Q: How do you design a CI/CD build matrix using CMake for multi-architecture firmware variants?**
 **A:** I decouple all the target-specific hardware definitions and compiler flags into separate toolchain files—like `arm-cortex-m4.cmake` or `qemu-arm.cmake`. Then in the CI pipeline (like GitHub Actions), I set up a matrix job. For each target, the runner calls `cmake -S . -B build/${TARGET} -DCMAKE_TOOLCHAIN_FILE=cmake/${TARGET}.cmake` followed by `cmake --build build/${TARGET}`. Because `-B` isolates the build artifacts completely out-of-source, there's zero chance of build cross-contamination between architectures, and artifact uploading is super straightforward.
 
 ---

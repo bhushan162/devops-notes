@@ -13,6 +13,13 @@ With QEMU, we spin up dozens of virtual ARM cores inside lightweight CI containe
 **Q: In QEMU, what does the `-nographic` flag do, and why is it mandatory for automated cloud CI/CD runners?**  
 **A:** By default, QEMU tries to open a graphical SDL or GTK window to emulate a computer monitor. Cloud CI runners (like GitHub Actions runners or Jenkins Linux agents) are headless servers that have no display server or X11 running; launching GUI apps causes them to crash. Passing `-nographic` disables the video console and redirects the virtual microcontroller's UART serial port directly to standard input/output (`stdin`/`stdout`). This allows CI scripts to read boot logs, check assertion strings, and monitor exit codes.
 
+**Q: How does Memory-Mapped I/O (MMIO) work inside QEMU under the hood?**  
+**A:** Microcontrollers talk to peripherals via specific 32-bit physical memory addresses (e.g., writing to UART TX data register at `0x4000C000`). QEMU uses the **Trap & Emulate** design pattern: when the virtual CPU attempts to write to that address, QEMU's memory dispatcher intercepts ("traps") the access, looks up the registered device handler function, and executes the software model for that hardware—such as formatting the character and piping it directly to Linux `stdout`.
+
+**Q: Why can't we test all physical sensors (I2C/SPI/ADC) in QEMU? Where does QEMU stop and Renode begin?**  
+**A:** QEMU is designed for ultra-fast CPU instruction emulation and RTOS kernel logic. However, QEMU does not model external off-chip hardware components. If your firmware tries to read a temperature sensor over I2C, it will sit in a loop waiting for a physical ACK bit that never comes, causing the virtual MCU to deadlock.  
+This is where **Renode** takes over. While QEMU is our Stage 4 fast smoke test (~0.5s boot), Renode is our Stage 5 system emulator. Renode lets us easily attach software models of real sensors, simulate button presses, inject analog noise, and test multi-board network communication before touching physical hardware.
+
 ---
 
 ## 📖 Behavioral / Experience Stories
