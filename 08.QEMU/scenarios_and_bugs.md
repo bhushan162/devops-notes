@@ -30,3 +30,27 @@
   1. **For QEMU Smoke Testing:** Use Zephyr Kconfig or build flags to bypass or stub hardware driver reads (e.g., `#ifdef CONFIG_QEMU / CONFIG_BOARD_QEMU_CORTEX_M3` return mocked dummy sensor data `25.0°C`).
   2. **For True Hardware Peripheral Testing:** Shift the test to **Renode (Stage 5)** or physical HIL (Stage 7). Renode allows wiring virtual I2C sensor models (like TI TMP102) to the virtual bus using `.repl` definitions, accurately returning ACK bits and simulated temperature values.
 * **The Lesson:** QEMU does not simulate external physical circuits or slave chips out of the box. Any polling loop waiting for an external hardware ACK will deadlock in QEMU unless mocked in software or run inside Renode.
+
+---
+
+## 🔴 Bug: QEMU crashes/hangs immediately when running physical board binary (Memory Map Mismatch)
+* **The Context:** Compiling firmware for the physical STM32 Nucleo board (`west build -b nucleo_f401re`) and trying to execute that same binary inside QEMU using `qemu-system-arm -machine lm3s6965evb`.
+* **The Error/Symptom:**
+  QEMU starts but prints nothing to the terminal. The virtual CPU immediately halts, crashes, or triggers an unhandled HardFault.
+* **My Thought Process:** I thought my C code had a bug or QEMU was broken. But `nucleo_f401re` (STM32) and `lm3s6965evb` (TI Stellaris) are two completely different physical motherboards:
+  * STM32 Flash memory starts at **`0x08000000`**. The linker script places the interrupt vector table at `0x08000000`.
+  * TI Stellaris (QEMU) Flash memory starts at **`0x00000000`**. When QEMU powers on, its virtual CPU looks at address `0x00000000` for the initial Stack Pointer and Reset Handler.
+  Because the STM32 binary was linked for address `0x08000000`, QEMU finds empty memory at `0x00000000` and immediately crashes!
+* **The Fix:**
+  In CI/CD, we must separate the build targets:
+  1. Build specifically for QEMU simulation into its own directory:
+     ```bash
+     west build -p always -b qemu_cortex_m3 firmware/ -d build_qemu
+     ```
+  2. Point the test runner script directly to that binary:
+     `BINARY_PATH = "build_qemu/zephyr/zephyr.elf"`
+  3. Build the physical STM32 firmware separately for hardware release:
+     ```bash
+     west build -p always -b nucleo_f401re firmware/ -d build_stm32
+     ```
+* **The Lesson:** Never assume an ARM binary compiled for one microcontroller can run on another ARM board. Even if both use Cortex-M, their physical memory maps, Flash base addresses, and peripheral registers are completely different. Emulation in QEMU requires compiling against a supported virtual board definition (`qemu_cortex_m3`).
