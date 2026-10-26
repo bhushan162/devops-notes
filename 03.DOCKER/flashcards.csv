@@ -1,0 +1,43 @@
+Front,Back
+"What is the fundamental architectural difference between Docker containers and Virtual Machines (VMs)?","VMs boot an entire guest OS kernel via a hypervisor (heavy, minutes to boot, gigabytes of RAM/disk). Docker containers share the host Linux kernel directly using namespaces (isolation) and cgroups (resource limits), booting in milliseconds with almost zero overhead."
+"How does Docker achieve process isolation and resource limits on Linux?","Using Linux kernel primitives: namespaces provide process, network, and mount isolation; cgroups (control groups) enforce CPU, memory, and I/O resource limits."
+"In Docker port mapping `-p 6000:6379`, which port is the host and which is the container?","Syntax is `-p <Host_Port>:<Container_Port>`. Host port is 6000 (outside network connects here) and container port is 6379 (service inside container listens here)."
+"What determines the lifecycle of a Docker container? When does it stop?","A container only lives as long as its foreground main process (PID 1) is active. When PID 1 exits or completes, the container immediately stops."
+"What happens if you run `docker run -t ...` without the `-i` flag when trying to get an interactive shell?","`-t` allocates a pseudo-TTY (renders prompt and colors), but `-i` keeps STDIN open. Without `-i`, you will see a prompt but cannot type any keystrokes into it (it appears frozen). Always use `-it` together."
+"Why does `docker exec -it <container> /bin/bash` fail on minimal or Alpine images, and how do you fix it?","Minimal images like Alpine do not include Bash by default. Fix: use standard shell `/bin/sh` instead: `docker exec -it <container> sh`."
+"What is the difference between `docker ps` and `docker ps -a`?","`docker ps` only shows currently running containers. `docker ps -a` lists all containers, including stopped and exited containers."
+"What command removes all Docker containers (both running and stopped) at once?","`docker rm -f $(docker ps -a -q)`"
+"What is the difference between `docker stop <id>` and `docker rm <id>`?","`docker stop` gracefully stops a running container process. `docker rm` permanently removes the stopped container and its writable layer from disk."
+"How do you view live, streaming logs of a Docker container?","`docker logs -f <container_name_or_id>`"
+"Why are containers considered ephemeral by default, and how do volumes solve this?","Any data written to a container's writable layer is permanently deleted when the container is removed (`docker rm`). Volumes store data outside the container's lifecycle on the host, ensuring data persists across restarts and image updates."
+"What are the three types of Docker volumes and their syntax in `docker run -v`?","1. Host Bind Mount: `-v /host/path:/container/path` (maps explicit host directory). 2. Anonymous Volume: `-v /container/path` (Docker manages a random hash path). 3. Named Volume: `-v <volume_name>:/container/path` (named reference managed cleanly by Docker)."
+"Which Docker volume type is recommended for production databases and edge telemetry, and why?","Named volumes (`-v my_vol:/path`). Docker handles storage paths across OS environments safely without hardcoding host filesystem paths, managing lifecycle and permissions cleanly."
+"What is the risk of using Host Bind Mounts on Linux regarding permissions?","If the user inside the container (e.g. UID 0 root) creates files, they are owned by root on the host. Non-root host users or CI runners get locked out with `Permission Denied` errors."
+"What Docker commands manage volume lifecycle (list, inspect, prune)?","- List: `docker volume ls`
+- Inspect: `docker volume inspect <name>`
+- Create: `docker volume create <name>`
+- Remove unused: `docker volume rm <name>`
+- Delete all dangling: `docker volume prune`"
+"In a Dockerfile, what is the difference between `RUN` and `CMD`?","`RUN` executes during the image build phase to install packages and modify image layers. `CMD` specifies the default command/entrypoint to execute when a container starts up at runtime."
+"In a Dockerfile, what does `WORKDIR` do?","Sets the working directory inside the container for all subsequent instructions (`RUN`, `COPY`, `CMD`, `ENTRYPOINT`)."
+"Why can a 5 KB Python script result in a 950 MB Docker image, and how do you optimize it?","Using `FROM python:3.11` pulls a full Debian/Ubuntu OS with compilers and development tools. Fix: Use `FROM python:3.11-alpine` (~5 MB base) or Distroless, dropping image size to under 50 MB."
+"What is a key drawback/gotcha of Alpine Linux images when compiling C/C++ or installing Python wheels?","Alpine uses `musl libc` instead of GNU `glibc`. Precompiled Python wheels targeting glibc will not install directly, forcing packages to compile from source or fail unless Alpine-specific build dependencies are installed."
+"How should Dockerfile instructions be ordered to take maximum advantage of Docker layer caching?","Put infrequently changing instructions first and frequently changing instructions last. For example: copy dependency manifests (`requirements.txt` or `package.json`) and run install BEFORE running `COPY . .` of source code."
+"How do you build a Docker image without using cached layers?","`docker build --no-cache -t my-app:tag .`"
+"Can an x86_64 Docker container run natively on an ARM64 edge device (e.g. Raspberry Pi)? What happens?","No, it fails with `exec format error` because ARM CPUs cannot execute x86 instructions. It requires QEMU user emulation (`binfmt_misc`) with a performance hit, or building multi-arch images (`docker buildx`)."
+"Bug Scenario: Container started with `docker run -d` exits immediately with exit code 0. Why, and how do you fix it?","Reason: Docker containers exit when PID 1 finishes. The script completed its execution and exited normally.
+Fix: Ensure background daemons run an active event/polling loop, or run interactively with `docker run -it <image> bash`. Check exit status with `docker ps -a` and inspect logs via `docker logs`."
+"Bug Scenario: Mounting a host directory (`-v $(pwd):/workspace`) causes `build/` files to be owned by root, breaking CI runner cleanup (`git clean -fdx`). How do you fix it?","Run the container matching the host user's UID/GID:
+`docker run --rm --user $(id -u):$(id -g) -v $(pwd):/workspace ...`
+Or run post-build cleanup inside container before exit: `chown -R $(id -u):$(id -g) /workspace/build`."
+"What are the three essential Docker Compose commands for lifecycle management?","- Start in background: `docker compose up -d`
+- Stop containers: `docker compose stop`
+- Stop and remove containers, networks, and volumes: `docker compose down`"
+"Why is small Docker image size (<50 MB) critical for Edge Computing and IoT devices?","Edge devices use limited flash/eMMC storage (sensitive to wear) and low RAM. Deploying updates over cellular (LTE/5G) or satellite is slow, costly, and risks OTA timeouts with heavy gigabyte images."
+"What Dockerfile instruction sets environment variables that persist both at build time and runtime?","`ENV <KEY>=<value>` (e.g., `ENV PORT=8080`)."
+"In Docker CLI, what does the `-d` flag do in `docker run -d`?","Detached mode: runs the container in the background and prints the container ID, leaving your terminal free."
+"What is the purpose of `docker build -f Dockerfile.edge -t my-edge-app:1.0 .`?","Builds an image using a specific named Dockerfile (`Dockerfile.edge`) instead of the default `Dockerfile` in the context path."
+"Behavioral/Story: How did you optimize Docker services for edge gateways in your project?","Situation: Legacy scripts caused host library conflicts and risky firmware re-flashing.
+Task: Containerize microservices with minimal footprint and persistent telemetry.
+Action: Switched to Alpine base images (900MB -> 45MB), configured named volumes for telemetry data persistence across OTA updates, and managed services via Docker Compose.
+Result: Zero host pollution, atomic zero-downtime updates over cellular links, and reliable sensor data retention."
