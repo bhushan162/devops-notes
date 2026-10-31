@@ -1,13 +1,4 @@
 # Docker Volumes & Data Persistence
-
-> **Status:** 🟢 Active Learning  
-> **Tags:** #docker, #volumes, #storage, #persistence, #edge-devops
-
-## 📝 TL;DR (1-Minute Revision)
-* **What is it:** Dedicated storage mechanisms for persisting container data outside of the container's ephemeral read-write layer.
-* **Primary use:** Preserve edge sensor data, databases, and logs so data survives container restarts, crashes, and OTA firmware/image updates.
-* **Key command:** `docker run -v <named_volume>:<container_path> <image>`
-
 ---
 
 ## 🧠 Core Concepts

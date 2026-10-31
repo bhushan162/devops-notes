@@ -1,13 +1,5 @@
 # Docker Fundamentals & Container Lifecycle
 
-> **Status:** 🟢 Active Learning  
-> **Tags:** #docker, #containers, #devops, #edge-computing, #interview-prep
-
-## 📝 TL;DR (1-Minute Revision)
-* **What is it:** A lightweight containerization platform that packages applications and dependencies together, sharing the host OS kernel.
-* **Primary use:** Run portable, isolated edge applications (like MQTT brokers, telemetry collectors) on edge gateways without the heavy memory and CPU overhead of virtual machines.
-* **Key command:** `docker run -d -p <host_port>:<container_port> --name <name> <image_name>`
-
 ---
 
 ## 🧠 Core Concepts

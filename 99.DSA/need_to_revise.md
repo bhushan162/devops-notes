@@ -12,3 +12,11 @@
 ```cpp
   int num = sqrt(num2);
 ```
+
+## easily swap 
+
+- need to learn prpoperly 
+
+```cpp
+  swap(i, j);
+```
